@@ -1,5 +1,8 @@
 BTC Wallet Miner
 
+pls join the discord if you have any problems:
+https://discord.gg/S4eSxwwBRn
+
 This repository contains a Python script that generates and checks Bitcoin (BTC) wallets for balances. It utilizes the BlockCypher API to check the balance of the generated wallets.
 
 Prerequisites:
