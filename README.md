@@ -28,7 +28,7 @@ Usage:
    `cd btc-wallet-miner`
 
 3. Run the script using the following command:
-   `python jbminer.py`
+   `python jbminer.py` or open the jbminer.exe
 
 4. The script will prompt you with a series of questions:
    - Do you want to use a webhook? (yes/no): If you want to receive notifications via Discord webhook, enter "yes" and provide the Discord webhook URL when prompted. Otherwise, enter "no".
