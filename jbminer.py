@@ -1,69 +1,89 @@
-import random
+from pystyle import Anime, Write, Colorate, Colors, Box, Center
+from time import sleep
+from multiprocessing import Process, Value, freeze_support, Lock
 import requests
-from termcolor import colored
-import threading
-import time
-import discord
-from discord_webhook import DiscordWebhook
+import json
+import urllib3
+from mnemonic import Mnemonic
+import bip32utils
+import random
 
-def generate_wallet():
-    # Generate a random private key
-    private_key = ''.join(random.choice('0123456789abcdef') for _ in range(64))
-    
-    # Calculate the corresponding Bitcoin address (public key)
-    public_key = private_key_to_public_key(private_key)
-    bitcoin_address = public_key_to_bitcoin_address(public_key)
-    
-    return private_key, bitcoin_address
+def HitWebhook(bal, wallet, WIF, words, webhook_url):
+    try:
+        data = {
+            "content": None,
+            "embeds": [
+                {
+                    "title": "JBWallet",
+                    "description": f"HIT! | WIF: {str(WIF)} | Bal: {bal} | Address: {str(wallet)} | Seed: {str(words)}",
+                    "color": 6749952,
+                    "author": {"name": "Miner Started!"}
+                }
+            ],
+            "username": "JBWallet",
+            "avatar_url": "https://cdn.discordapp.com/attachments/1062796452885188670/1068636566605537330/image.png",
+            "attachments": []
+        }
+        headers = {'Content-type': 'application/json'}
+        response = requests.post(webhook_url, data=json.dumps(data), headers=headers)
+    except:
+        return None
 
-def private_key_to_public_key(private_key):
-    # Here, you should use the appropriate algorithms and libraries to calculate a public key
-    # This is a simplified version and not a real implementation
-    return private_key
+def btcMiner(fails, lock, hits, webhook_url):
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-def public_key_to_bitcoin_address(public_key):
-    # Here, you should use the appropriate algorithms and libraries to calculate a Bitcoin address
-    # This is a simplified version and not a real implementation
-    return public_key
+    while True:
+        mnemonic = Mnemonic("english")
+        words = mnemonic.generate(strength=256)
+        seed = mnemonic.to_seed(words)
 
-def check_balance(bitcoin_address):
-    # Make an API call to check the balance of the Bitcoin address
-    api_url = f"https://api.blockcypher.com/v1/btc/main/addrs/{bitcoin_address}/balance"
-    response = requests.get(api_url)
-    data = response.json()
-    balance = data.get('balance', 0)
-    
-    return balance
+        key = bip32utils.BIP32Key.fromEntropy(seed)
+        address = key.Address()
+        WIF = key.WalletImportFormat()
 
-def send_discord_message(webhook_url, content):
-    webhook = DiscordWebhook(url=webhook_url, content=content)
-    webhook.execute()
+        # Check Balance
+        response = requests.get(f"https://api-r.bitcoinchain.com/v1/address/{address}")
+        lol = response.text
 
-def generate_and_check(webhook_url=None):
-    # Generate a new wallet
-    private_key, bitcoin_address = generate_wallet()
-    balance = check_balance(bitcoin_address)
+        if "balance" in lol:
+            try:
+                ls = json.loads(lol)
+                for balance in ls:
+                    bal = balance["balance"]
+                    if bal > 0:
+                        try:
+                            hits.value += 1
+                        except:
+                            continue
+                        f = open("hits.txt", "a")
+                        data = f'New Hit! | balance: {bal} | Wallet: {address} | WIF: {WIF} | Phrase: {words}'
+                        f.write(str(data) + "\n")
+                        f.close()
+                        print(Colorate.Color(Colors.green, data))
+                        try:
+                            if webhook_url:
+                                HitWebhook(bal, address, WIF, words, webhook_url)
+                        except:
+                            print("Webhook Error!")
+                            continue
+                        input("")
+                    else:
+                        print(Colorate.Color(Colors.red, f"[+] {address} > 0.00 BTC ($0.00)"))
+                        fails.value += 1
+                else:
+                    print(Colorate.Color(Colors.red, f"[+] {address} > 0.00 BTC ($0.00)"))
+                    fails.value += 1
+            except:
+                print("Blocked...")
+        else:
+            print(Colorate.Color(Colors.red, f"[+] {address} > 0.00 BTC ($0.00)"))
+            fails.value += 1
 
-    # Prepare the message and adjust the text color
-    if balance > 0:
-        message = f"Found a Bitcoin wallet with balance!\n\n"
-        message += colored(f"Private Key: {private_key}\n", 'green')
-        message += colored(f"Bitcoin Address: {bitcoin_address}\n", 'green')
-        message += colored(f"Balance: {balance} BTC\n", 'green')
-        
-        # Check if Discord webhook usage is desired
-        if webhook_url:
-            send_discord_message(webhook_url, message)
-    else:
-        message = f"Found a Bitcoin wallet without balance.\n\n"
-        message += colored(f"Private Key: {private_key}\n", 'red')
-        message += colored(f"Bitcoin Address: {bitcoin_address}\n", 'red')
-        message += colored(f"Balance: {balance} BTC\n", 'red')
+if __name__ == '__main__':
+    freeze_support()
 
-    print(message)
-
-def main():
-    print(colored('''
+    def header():
+        print(Center.XCenter(Colorate.Vertical(Colors.purple_to_red, """
    ____________  ____                 
   |_  | ___ \  \/  (_)                
     | | |_/ / .  . |_ _ __   ___ _ __ 
@@ -76,26 +96,31 @@ def main():
 __   __`| | | |/' |`| | 
 \ \ / / | | |  /| | | | 
  \ V / _| |_\ |_/ /_| |_
-  \_/  \___(_)___(_)___/''', 'red'))
+  \_/  \___(_)___(_)___/
+        """)))
 
-    use_webhook = input("Do you want to use a webhook? (yes/no): ")
-    if use_webhook.lower() == 'yes':
-        webhook_url = input("Enter the Discord webhook URL: ")
-    else:
-        webhook_url = None
-    
-    wallets_per_second = int(input("How many BTC wallets do you want to generate and check per second? "))
-    
-    threads = []
-    while True:
-        for _ in range(wallets_per_second):
-            thread = threading.Thread(target=generate_and_check, args=(webhook_url,))
-            thread.start()
-            threads.append(thread)
-        time.sleep(1)
-        for thread in threads:
-            thread.join()
-        threads.clear()
+    def menu():
+        header()
 
-if __name__ == "__main__":
-    main()
+        use_webhook = input("Do you want to use a webhook? (yes/no): ")
+        if use_webhook.lower() == "yes":
+            webhook_url = input("Enter the Discord webhook URL: ")
+        else:
+            webhook_url = None
+
+        wallets_per_second = int(input("How many BTC wallets do you want to generate and check per second? "))
+
+        print(Colorate.Horizontal(Colors.green_to_white, "Starting Threads..."))
+
+        fails = Value('i', 0)
+        hits = Value('i', 0)
+        lock = Lock()
+
+        try:
+            for _ in range(wallets_per_second):
+                thread = Process(target=btcMiner, args=(fails, lock, hits, webhook_url))
+                thread.start()
+        except Exception as e:
+            print(e)
+
+    menu()
