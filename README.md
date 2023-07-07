@@ -11,13 +11,13 @@ Before running the script, ensure that you have the following prerequisites inst
 Installation:
 
 1. Clone the repository:
-   'git clone https://github.com/coder026jb/btc-wallet-miner.git'
+   `git clone https://github.com/coder026jb/btc-wallet-miner.git`
 
 2. Navigate to the project directory:
-   cd btc-wallet-miner
+   `cd btc-wallet-miner`
 
 3. Install the required dependencies by running the following command:
-   pip install -r requirements.txt
+  `pip install -r requirements.txt`
    This will install the necessary modules (requests, termcolor, discord, discord_webhook) required by the script.
 
 Usage:
@@ -25,10 +25,10 @@ Usage:
 1. Open a command-line interface (CLI) or terminal.
 
 2. Navigate to the project directory:
-   cd btc-wallet-miner
+   `cd btc-wallet-miner`
 
 3. Run the script using the following command:
-   python jbminer.py
+   `python jbminer.py`
 
 4. The script will prompt you with a series of questions:
    - Do you want to use a webhook? (yes/no): If you want to receive notifications via Discord webhook, enter "yes" and provide the Discord webhook URL when prompted. Otherwise, enter "no".
