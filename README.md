@@ -1,14 +1,14 @@
-#BTC Wallet Miner
+BTC Wallet Miner
 
 This repository contains a Python script that generates and checks Bitcoin (BTC) wallets for balances. It utilizes the BlockCypher API to check the balance of the generated wallets.
 
-#Prerequisites:
+Prerequisites:
 
 Before running the script, ensure that you have the following prerequisites installed:
 
 - Python 3.x: The script is written in Python and requires Python 3.x to be installed on your system.
 
-#Installation:
+Installation:
 
 1. Clone the repository:
    git clone https://github.com/coder026jb/btc-wallet-miner.git
@@ -20,7 +20,7 @@ Before running the script, ensure that you have the following prerequisites inst
    pip install -r requirements.txt
    This will install the necessary modules (requests, termcolor, discord, discord_webhook) required by the script.
 
-#Usage:
+Usage:
 
 1. Open a command-line interface (CLI) or terminal.
 
@@ -36,7 +36,7 @@ Before running the script, ensure that you have the following prerequisites inst
 
 5. Sit back and let the script generate and check the BTC wallets. The script will display the results in the console and, if a webhook URL is provided, it will send notifications to the specified Discord channel.
 
-#Contributing:
+Contributing:
 
 Contributions to this repository are welcome. If you encounter any issues or have suggestions for improvements, please create a new issue or submit a pull request.
 
