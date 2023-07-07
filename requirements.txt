@@ -1,0 +1,4 @@
+pystyle
+requests
+mnemonic
+bip32utils
