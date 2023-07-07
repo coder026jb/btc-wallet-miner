@@ -11,7 +11,7 @@ Before running the script, ensure that you have the following prerequisites inst
 Installation:
 
 1. Clone the repository:
-   git clone https://github.com/coder026jb/btc-wallet-miner.git
+   'git clone https://github.com/coder026jb/btc-wallet-miner.git'
 
 2. Navigate to the project directory:
    cd btc-wallet-miner
